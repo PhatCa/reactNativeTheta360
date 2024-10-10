@@ -202,6 +202,73 @@ SIMPLE_JWT = {
 }
 ```
 
-### Conclusion
+### Next Steps
 
 You now have a Django application serving a REST API with JWT authentication. You can create additional views and restrict access using the JWT token. For more advanced use cases, you can further customize the JWT payload, token lifetime, and authentication logic.
+
+### Try Out Live Servers
+
+#### Oppkey API Developer Demonstration Server
+
+You can access the APIs for the Oppkey Django server here:
+
+<https://image360.oppget.com/api/>
+
+```text
+username: tutorial
+password: theta360DotGuide
+```
+
+This [example](https://github.com/PhatCa/reactNativeTheta360/blob/8b5954db3a41d73bb8fc4475fe850b4ebf752d99/App.tsx#L83) shows how to use a token.
+
+```javascript
+const response = await fetch('https://image360.oppget.com/api/user-photo/', {
+method: 'GET',
+headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+},
+});
+```
+
+#### RICOH360 Cloud API Official
+
+RICOH offers a high-quality construction server suitable for commercial use.
+
+Additional information is available here: <https://docs.ricoh360.com/>
+
+[This](https://github.com/theta360developers/oppkey-ricoh-viewer-demo-basic/blob/cc97fdb27fab627c9140729dc90cb4f78c0ebcfc/index.js#L30) is an example of using Amazon Cognito to generate a token and pull content
+from the RICOH API server.
+
+```javascript
+const getContent = async () => {
+  // post to aws auth to get authentication token
+  const tokenEndpoint =
+    "https://saas-prod.auth.us-west-2.amazoncognito.com/oauth2/token";
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  const requestData = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${auth}`,
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      scope: "all/read",
+    }),
+  };
+  const tokenResponse = await fetch(tokenEndpoint, requestData);
+  const tokenObject = await tokenResponse.json();
+
+  // use token authentication from AWS to fetch content from content API
+  const res = await fetch("https://api.ricoh360.com/contents?limit=50", {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + tokenObject.access_token,
+    },
+  });
+  const data = await res.json();
+  return data;
+};
+```
+
