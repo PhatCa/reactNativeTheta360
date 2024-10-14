@@ -27,7 +27,7 @@ npm run android
 npm run ios
 ```
 
-## logging in
+## API Authentication Information
 
 username: tutorial
 password: theta360DotGuide
