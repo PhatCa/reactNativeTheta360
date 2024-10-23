@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ScrollView } from 'react-native-gesture-handler';
+import UploadForm from './src/components/UploadForm';
 
 
 const Stack = createStackNavigator();
@@ -69,7 +70,7 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -140,6 +141,10 @@ const HomeScreen = () => {
 
     return (
         <ScrollView style={styles.container}>
+            <Button
+        title="Go to Upload Form"
+        onPress={() => navigation.navigate('UploadForm')}
+      />
           {data.length > 0 ? (
             data.map((item) => (
               <View key={item.id} style={styles.itemContainer}>
@@ -177,6 +182,7 @@ const App = () => {
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="UploadForm" component={UploadForm} />
       </Stack.Navigator>
     </NavigationContainer>
   );

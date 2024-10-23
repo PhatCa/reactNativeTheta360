@@ -272,3 +272,88 @@ const getContent = async () => {
 };
 ```
 
+# Phase II
+
+At this stage of the application, users are able to use their credentials to log in to the app and receive a JWT token, which is stored in LocalStorage. After that, users are directed to the Home screen, where the app fetches all images belonging to them using their JWT credentials. On the Home screen, besides viewing the image listing, users also have the option to delete selected images. Additionally, there is an option for users to upload images to the database for testing using the "Upload Image" button.
+
+Login View
+![screenshot](readme_assets/Login-View.png)
+
+Home Page
+![screenshot](readme_assets/ios_screenshot.png)
+
+Upload Form
+![screenshot](readme_assets/UploadForm.png)
+
+> **Note**: For the License Link, you need to specify the protocol (`http` or `https`) and the full domain. For example, use `https://www.yourlicense.com`.
+
+
+## Features
+- User Authentication
+- JWT Token Storage
+- Image Fetching
+- Image Deletion
+- Image Upload
+
+## New Package in Phase II
+- DateTimePicker : using for date field
+
+```react-native
+<DateTimePicker
+    testID="dateTimePicker"       // Identifier for testing purposes
+    value={dateTaken}             // Current selected date
+    mode="date"                   // Mode to show only date (can be 'date', 'time', or 'datetime')
+    display="default"             // Display style ('default', 'spinner', 'calendar', etc.)
+    onChange={chooseDate}         // Function to handle date change event
+/>
+
+```
+
+- ImageResizer : resize and compress image to send over to the api post method
+
+```react-native
+const compressImage = async (imageUri) => {
+  try {
+    const response = await ImageResizer.createResizedImage(
+      imageUri,       // Image URI to compress
+      800,            // Width of the resized image
+      600,            // Height of the resized image
+      'JPEG',         // Format of the image ('JPEG', 'PNG', etc.)
+      80              // Quality of the compressed image (0-100)
+    );
+    return response.uri;   // Returns the URI of the resized image
+  } catch (error) {
+    console.error(error);
+    Alert.alert('Image compression failed: ' + error.message);
+  }
+};
+```
+
+- Image Picker: To access image and select image in gallery
+
+```react-native
+const pickImage = () => {
+    launchImageLibrary({ mediaType: 'photo' }, (response) => {
+      if (response.didCancel) {
+        Alert.alert('Image selection canceled');
+      } else if (response.errorMessage) {
+        Alert.alert('Error: ' + response.errorMessage);
+      } else {
+        const uri = response.assets[0].uri;
+        setImageUri(uri);
+      }
+    });
+  };
+
+```
+
+> **Note**: For IOS, you need to modify the Info.plist file to request access to photo library
+
+```xml
+<key>NSPhotoLibraryUsageDescription</key>
+<string>We need your permission to access the photo library</string>
+```
+
+## Steps for Usage with Phase II:
+1. Run Npm install
+2. cd into IOS run pod install
