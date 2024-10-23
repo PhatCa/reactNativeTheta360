@@ -357,3 +357,11 @@ const pickImage = () => {
 ## Steps for Usage with Phase II:
 1. Run Npm install
 2. cd into IOS run pod install
+
+## Phase III
+
+* implement image viewer with marizipano in a webview
+* have two conditions:
+  1. image is on image360.oppget.com
+  2. image is already downloaded from image360.oppget.com and stored in camera roll of iOS
+  
