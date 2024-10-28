@@ -1,11 +1,14 @@
 import 'react-native-gesture-handler'; // This should be at the very top of the file
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, TextInput, Button, Text, StyleSheet, View, ActivityIndicator, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { SafeAreaView, TextInput, Button, Text, StyleSheet, View, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ScrollView } from 'react-native-gesture-handler';
 import UploadForm from './src/components/UploadForm';
+import { WebView } from 'react-native-webview';
+import type { WebView as WebViewType } from 'react-native-webview';
+
 
 
 const Stack = createStackNavigator();
@@ -14,6 +17,7 @@ const LoginScreen = ({ navigation }) => {
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
 
   const handleLogin = async () => {
     try {
@@ -74,6 +78,7 @@ const HomeScreen = ({navigation}) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
 
     const fetchData = async () => {
         try {
@@ -126,6 +131,11 @@ const HomeScreen = ({navigation}) => {
         }
       };
 
+      const handleImagePress = (imageUrl) => {
+        navigation.navigate('ViewerScreen', { imageUrl });
+      };
+    
+
     useEffect(() => {
 
       fetchData();
@@ -148,12 +158,9 @@ const HomeScreen = ({navigation}) => {
           {data.length > 0 ? (
             data.map((item) => (
               <View key={item.id} style={styles.itemContainer}>
-                {/* Assuming the data item has 'id', 'name', and 'description' properties */}
-                <Image
-                source={{ uri: item.image }} // Replace with the correct field name for your image URL
-                style={styles.image}
-                resizeMode="cover"
-                />
+                <TouchableOpacity onPress={() => handleImagePress(item.image)}>
+                    <Image source={{ uri: item.image }} style={styles.image} resizeMode="cover" />
+                </TouchableOpacity>
                 <Text style={styles.itemText}>ID: {item.id}</Text>
                 <Text style={styles.itemText}>Name: {item.name}</Text>
                 <Text style={styles.itemText}>Description: {item.description}</Text>
@@ -175,6 +182,25 @@ const HomeScreen = ({navigation}) => {
       );
     };
 
+    const ViewerScreen = ({ route }) => {
+        const { imageUrl } = route.params;
+    const htmlUri = require('./assets/viewer.html');
+
+    const injectedJS = `
+        window.imageUrl = "${imageUrl}";
+        window.dispatchEvent(new Event("loadImageUrl"));
+    `;
+
+    return (
+        <WebView
+            originWhitelist={['*']}
+            source={htmlUri}
+            style={{ flex: 1 }}
+            injectedJavaScript={injectedJS}
+        />
+    );
+};
+
 
 const App = () => {
   return (
@@ -183,6 +209,7 @@ const App = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="UploadForm" component={UploadForm} />
+        <Stack.Screen name="ViewerScreen" component={ViewerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

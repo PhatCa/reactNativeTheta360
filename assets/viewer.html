@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360 Viewer</title>
+    <script src="https://www.marzipano.net/demos/common/marzipano.js"></script>
+</head>
+<body>
+    <h1 id="image-url-display">Loading image URL...</h1>
+    <div id="pano"></div>
+    <script>
+        // Display image URL in <h1> when "loadImageUrl" event is triggered
+        function displayImageUrl() {
+            const imageUrlDisplay = document.getElementById('image-url-display');
+            imageUrlDisplay.textContent = window.imageUrl;
+        }
+
+        // Listen for the "loadImageUrl" event to update the <h1> and initialize the viewer
+        window.addEventListener("loadImageUrl", () => {
+            displayImageUrl();
+            initializeViewer();
+        });
+    </script>
+</body>
+</html>
