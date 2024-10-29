@@ -315,8 +315,8 @@ const pickImage = () => {
 ```
 
 ## Steps for Usage with Phase II:
-1. Run Npm install
-2. cd into IOS run pod install
+1. Run `npm install`
+2. cd into IOS run `pod install`
 
 ## Phase III
 
