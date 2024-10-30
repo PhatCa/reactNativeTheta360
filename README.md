@@ -455,6 +455,78 @@ const deleteImage = async (imageId) => {
 - After a successful deletion, the app logs a confirmation and can update the UI to reflect the change, such as removing the deleted image from view or refreshing the image list.
 
 ### Image Upload
+The image upload form allows users to select, customize, and upload images with metadata like title, description, and date taken. This feature includes image selection, compression, and authenticated uploads to the server. During implementation, I encountered challenges with image sizing and date compatibility, which are explained in detail below.
+
+src/UploadForm.js
+```react-native
+const uploadImage = async () => {
+  if (!imageUri) {
+    Alert.alert('Please select an image first');
+    return;
+  }
+  if (!title) {
+    Alert.alert('Please provide a title.');
+    return;
+  }
+
+  try {
+    const compressedImageUri = await compressImage(imageUri);
+
+    const formData = new FormData();
+    const modifiedImageName = imageName.endsWith('.jpg') ? imageName : `${imageName}.jpg`;
+
+    formData.append('image', {
+      uri: compressedImageUri,
+      name: modifiedImageName,
+      type: 'image/jpeg',
+    });
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('attribution', attribution);
+    formData.append('license_link', licenseLink);
+    formData.append('date_taken', dateTaken.toISOString().split('T')[0]);
+    formData.append('camera_model', cameraModel);
+    formData.append('category', category);
+    formData.append('order', order);
+    const token = await AsyncStorage.getItem('accessToken');
+    setUploading(true);
+
+    const response = await axios.post(
+      'https://image360.oppget.com/api/upload-photo/',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    Alert.alert('Image uploaded successfully!');
+    console.log('Server response:', response.data);
+  } catch (error) {
+    console.log('Error Response:', error.response);
+    Alert.alert('Upload failed: ' + error.message);
+  } finally {
+    setUploading(false);
+  }
+};
+```
+2. Image Selection and Compression:
+- The pickImage function lets users select an image from their gallery, and compressImage resizes it to optimize upload performance.
+
+> **Difficulty that I found**: When I first worked with this feature, I did not use compressImage to resize the image. As a result, for some images, I encountered an error indicating they were too large, and the server timed out and rejected the request when I attempted to upload them. 
+
+3. Form Fields for MetaData:
+- Additional form fields enable users to enter metadata such as title, description, camera model, license, and category. Each field is stored in state and appended to formData for the upload request.
+
+> ** Compatibility Challenge **: Because we are using a Django setup for the backend with a DateField for the date, I initially had to research compatibility. I found that DateTimePicker is a useful package for React Native, providing a well-designed UI component for iOS and formatting the date correctly to match our backend implementation.
+
+4. Authenticated Upload Request:
+- The uploadImage function retrieves the accessToken from AsyncStorage and includes it in the request headers to ensure only authenticated users can upload images. The function then sends the image and metadata to the server.
+
+5. Error Handling:
+- If any required fields are missing, alerts prompt users to complete them. The app also includes error handling for upload failures, displaying an alert with a descriptive message.
 
 ## New Package in Phase II
 - DateTimePicker : using for date field
