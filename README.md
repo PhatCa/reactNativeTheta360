@@ -409,6 +409,7 @@ const HomeScreen = ({ navigation }) => {
 
 4. Security Considerations:
 - By using the accessToken from secure storage and ensuring that images are fetched only for authenticated users, this feature maintains security while offering personalized content.
+
 ### Image Deletion
 ### Image Upload
 
