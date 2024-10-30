@@ -184,23 +184,26 @@ const HomeScreen = ({navigation}) => {
 
     const ViewerScreen = ({ route }) => {
         const { imageUrl } = route.params;
-    const htmlUri = require('./assets/viewer.html');
-
-    const injectedJS = `
-        window.imageUrl = "${imageUrl}";
-        window.dispatchEvent(new Event("loadImageUrl"));
-    `;
-
-    return (
-        <WebView
-            originWhitelist={['*']}
-            source={htmlUri}
-            style={{ flex: 1 }}
-            injectedJavaScript={injectedJS}
-        />
-    );
-};
-
+        const htmlUri = require('./assets/viewer.html');
+        
+        const webviewRef = useRef<WebViewType>(null);
+    
+        return (
+            <WebView
+                ref={webviewRef}
+                originWhitelist={['*']}
+                source={htmlUri}
+                style={{ flex: 1 }}
+                onLoad={() => {
+                    console.log("Sending image URL via postMessage:", imageUrl); // Confirm imageUrl in console
+                    if (webviewRef.current) {
+                        webviewRef.current.postMessage(imageUrl); // Send imageUrl to the WebView
+                    }
+                }}
+            />
+        );
+    };
+    
 
 const App = () => {
   return (
