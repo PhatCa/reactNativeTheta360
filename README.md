@@ -333,6 +333,29 @@ const LoginScreen = ({ navigation }) => {
 
 
 ### JWT Token Storage
+To securely manage user sessions, we implemented JWT token storage within the app. This setup allows the app to persist user authentication between sessions by storing tokens on the device, providing a seamless experience while maintaining security. Below are the steps we used to implement this feature:
+
+1. Code Snippet for Token Storage:
+```react-native
+if (data.access) {
+  await AsyncStorage.setItem('accessToken', data.access);
+  await AsyncStorage.setItem('refreshToken', data.refresh);
+  console.log('Access token saved successfully:', data.access);
+
+  // Navigate to the Home screen
+  navigation.navigate('Home');
+} else {
+  setErrorMessage('No access token found');
+}
+```
+2. Access and Refresh Token Management:
+- Upon receiving tokens, the app stores both accessToken and refreshToken in AsyncStorage. 
+- Storing tokens locally allows the app to access them quickly when making subsequent requests, avoiding unnecessary reauthentication.
+
+3. Security Consideration:
+- By using AsyncStorage for token storage, we ensure that sensitive information is retained securely and can be accessed when the app needs to verify user sessions.
+- In addition by storing tokens rather than sensitive credentials (like the username and password) in AsyncStorage, the app reduces security risks. In the event of a malicious attack or unauthorized access, users’ actual credentials remain safe, as only the tokens are stored.
+
 ### Image Fetching
 ### Image Deletion
 ### Image Upload
