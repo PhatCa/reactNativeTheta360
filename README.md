@@ -255,7 +255,8 @@ The majority of the implementation and features are currently in App.tsx, which 
 ### User Authentication
 To implement secure user access, we added a basic token-based authentication system to the app. Our goal was to allow users to log in with credentials that would be verified by a backend server, with successful authentication granting access to the main app features. Below are the steps we used to implement this feature:
 
-1. Code Snippet for User Login
+1. Code Snippet for User Login:
+
 App.tsx:
 ```react-native
 const LoginScreen = ({ navigation }) => {
@@ -339,6 +340,7 @@ const LoginScreen = ({ navigation }) => {
 To securely manage user sessions, we implemented JWT token storage within the app. This setup allows the app to persist user authentication between sessions by storing tokens on the device, providing a seamless experience while maintaining security. Below are the steps we used to implement this feature:
 
 1. Code Snippet for Token Storage:
+
 App.tsx:
 ```react-native
 if (data.access) {
@@ -364,7 +366,8 @@ if (data.access) {
 To enhance the user experience, we implemented an image-fetching feature on the home screen that retrieves and displays user-specific images upon login. This feature relies on authenticated API requests to fetch content securely. Below are the steps we used to implement this feature:
 
 1. Code Snippet for Image Fetching:
-App.tsx
+
+App.tsx:
 ```react-native
 const HomeScreen = ({ navigation }) => {
   const [data, setData] = useState(null);
