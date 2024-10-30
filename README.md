@@ -414,6 +414,46 @@ const HomeScreen = ({ navigation }) => {
 - By using the accessToken from secure storage and ensuring that images are fetched only for authenticated users, this feature maintains security while offering personalized content.
 
 ### Image Deletion
+To allow users greater control over their content, we implemented an image deletion feature on the home screen. This feature enables users to remove unwanted images securely and ensures that deletion requests are handled through authenticated API calls. Below are the steps we used to implement this feature:
+
+1. Code Snippet for Image Deletion:
+
+App.tsx:
+```react-native
+const deleteImage = async (imageId) => {
+  try {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    if (!accessToken) {
+      throw new Error('No access token found');
+    }
+    const response = await fetch(`https://image360.oppget.com/api/user-photo/${imageId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete image');
+    }
+    console.log('Image deleted successfully');
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+```
+2. Authenticated Deletion Request:
+
+- The deleteImage function retrieves the accessToken from AsyncStorage and includes it in the Authorization header, enabling only authenticated users to delete images. This secure request removes the specified image from the backend.
+
+3. Error Handling:
+
+- The function includes error handling to catch any issues during the deletion process, displaying an error message if the request fails or if authentication is not available (where token expired).
+
+4. User Interface Update:
+
+- After a successful deletion, the app logs a confirmation and can update the UI to reflect the change, such as removing the deleted image from view or refreshing the image list.
+
 ### Image Upload
 
 ## New Package in Phase II
