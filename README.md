@@ -249,11 +249,14 @@ Upload Form
 
 
 ## Features
+
+The majority of the implementation and features are currently in App.tsx, which is not best practice for React Native as it’s recommended to break down functionality into separate components. I plan to refactor each feature into its own component for better readability and adherence to best practices. This restructuring will enhance the code organization and maintainability.
+
 ### User Authentication
 To implement secure user access, we added a basic token-based authentication system to the app. Our goal was to allow users to log in with credentials that would be verified by a backend server, with successful authentication granting access to the main app features. Below are the steps we used to implement this feature:
 
 1. Code Snippet for User Login
-
+App.tsx:
 ```react-native
 const LoginScreen = ({ navigation }) => {
   const [username, setUserName] = useState('');
@@ -336,6 +339,7 @@ const LoginScreen = ({ navigation }) => {
 To securely manage user sessions, we implemented JWT token storage within the app. This setup allows the app to persist user authentication between sessions by storing tokens on the device, providing a seamless experience while maintaining security. Below are the steps we used to implement this feature:
 
 1. Code Snippet for Token Storage:
+App.tsx:
 ```react-native
 if (data.access) {
   await AsyncStorage.setItem('accessToken', data.access);
@@ -357,6 +361,54 @@ if (data.access) {
 - In addition by storing tokens rather than sensitive credentials (like the username and password) in AsyncStorage, the app reduces security risks. In the event of a malicious attack or unauthorized access, users’ actual credentials remain safe, as only the tokens are stored.
 
 ### Image Fetching
+To enhance the user experience, we implemented an image-fetching feature on the home screen that retrieves and displays user-specific images upon login. This feature relies on authenticated API requests to fetch content securely. Below are the steps we used to implement this feature:
+
+1. Code Snippet for Image Fetching:
+App.tsx
+```react-native
+const HomeScreen = ({ navigation }) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+      const response = await fetch('https://image360.oppget.com/api/user-photo/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch images');
+      }
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+}
+```
+2. Authenticated API Request:
+- The fetchData function retrieves an access token from AsyncStorage and uses it in the Authorization header to securely request images from the backend. This ensures that only authenticated users can access this content.
+
+3. Error Handling and Loading State:
+- Error handling is implemented to catch and display any issues during the fetch request. Additionally, a loading state is set while the request is in progress, improving the user experience by providing feedback.
+
+4. Security Considerations:
+- By using the accessToken from secure storage and ensuring that images are fetched only for authenticated users, this feature maintains security while offering personalized content.
 ### Image Deletion
 ### Image Upload
 
