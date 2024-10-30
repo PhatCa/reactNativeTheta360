@@ -249,11 +249,284 @@ Upload Form
 
 
 ## Features
-- User Authentication
-- JWT Token Storage
-- Image Fetching
-- Image Deletion
-- Image Upload
+
+The majority of the implementation and features are currently in App.tsx, which is not best practice for React Native as it’s recommended to break down functionality into separate components. I plan to refactor each feature into its own component for better readability and adherence to best practices. This restructuring will enhance the code organization and maintainability.
+
+### User Authentication
+To implement secure user access, we added a basic token-based authentication system to the app. Our goal was to allow users to log in with credentials that would be verified by a backend server, with successful authentication granting access to the main app features. Below are the steps we used to implement this feature:
+
+1. Code Snippet for User Login:
+
+App.tsx:
+```react-native
+const LoginScreen = ({ navigation }) => {
+  const [username, setUserName] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('https://image360.oppget.com/api/token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access) {
+          await AsyncStorage.setItem('accessToken', data.access);
+          await AsyncStorage.setItem('refreshToken', data.refresh);
+          console.log('Access token saved successfully:', data.access);
+
+          // Navigate to the Home screen
+          navigation.navigate('Home');
+        } else {
+          setErrorMessage('No access token found');
+        }
+      } else {
+        const data = await response.json();
+        setErrorMessage(data.message);
+      }
+    } catch (error) {
+      setErrorMessage('An error occurred: ' + error);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUserName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+      <Button title="Login" onPress={handleLogin} />
+    </SafeAreaView>
+  );
+};
+```
+
+2. Login Screen Setup:
+- The app provides a LoginScreen component for user login, managed with React’s useState hooks to handle the username, password, and errorMessage states. These states help manage the form inputs and display error messages if login attempts fail.
+
+3. Login Process:
+- The handleLogin function within LoginScreen is the core of the login process. This function executes when the user taps the “Login” button, attempting to authenticate with the backend server.
+
+- Within handleLogin, the app sends a POST request to an API endpoint (https://image360.oppget.com/api/token/) with username and password in the request body.
+
+- The request is crafted using the fetch API, and headers include Content-Type: application/json to specify JSON format for the data.
+
+4. Response Handling:
+- If the server responds with a success status, the app checks if an access token is included in the response.
+
+- If an access token is received, the user is redirected to the Home screen via navigation.navigate('Home'). This navigation happens right after the token check, creating a seamless transition from login to the authenticated home view.
+
+
+### JWT Token Storage
+To securely manage user sessions, we implemented JWT token storage within the app. This setup allows the app to persist user authentication between sessions by storing tokens on the device, providing a seamless experience while maintaining security. Below are the steps we used to implement this feature:
+
+1. Code Snippet for Token Storage:
+
+App.tsx:
+```react-native
+if (data.access) {
+  await AsyncStorage.setItem('accessToken', data.access);
+  await AsyncStorage.setItem('refreshToken', data.refresh);
+  console.log('Access token saved successfully:', data.access);
+
+  // Navigate to the Home screen
+  navigation.navigate('Home');
+} else {
+  setErrorMessage('No access token found');
+}
+```
+2. Access and Refresh Token Management:
+- Upon receiving tokens, the app stores both accessToken and refreshToken in AsyncStorage. 
+- Storing tokens locally allows the app to access them quickly when making subsequent requests, avoiding unnecessary reauthentication.
+
+3. Security Consideration:
+- By using AsyncStorage for token storage, we ensure that sensitive information is retained securely and can be accessed when the app needs to verify user sessions.
+- In addition by storing tokens rather than sensitive credentials (like the username and password) in AsyncStorage, the app reduces security risks. In the event of a malicious attack or unauthorized access, users’ actual credentials remain safe, as only the tokens are stored.
+
+### Image Fetching
+To enhance the user experience, we implemented an image-fetching feature on the home screen that retrieves and displays user-specific images upon login. This feature relies on authenticated API requests to fetch content securely. Below are the steps we used to implement this feature:
+
+1. Code Snippet for Image Fetching:
+
+App.tsx:
+```react-native
+const HomeScreen = ({ navigation }) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+      const response = await fetch('https://image360.oppget.com/api/user-photo/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch images');
+      }
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+}
+```
+2. Authenticated API Request:
+- The fetchData function retrieves an access token from AsyncStorage and uses it in the Authorization header to securely request images from the backend. This ensures that only authenticated users can access this content.
+
+3. Error Handling and Loading State:
+- Error handling is implemented to catch and display any issues during the fetch request. Additionally, a loading state is set while the request is in progress, improving the user experience by providing feedback.
+
+4. Security Considerations:
+- By using the accessToken from secure storage and ensuring that images are fetched only for authenticated users, this feature maintains security while offering personalized content.
+
+### Image Deletion
+To allow users greater control over their content, we implemented an image deletion feature on the home screen. This feature enables users to remove unwanted images securely and ensures that deletion requests are handled through authenticated API calls. Below are the steps we used to implement this feature:
+
+1. Code Snippet for Image Deletion:
+
+App.tsx:
+```react-native
+const deleteImage = async (imageId) => {
+  try {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    if (!accessToken) {
+      throw new Error('No access token found');
+    }
+    const response = await fetch(`https://image360.oppget.com/api/user-photo/${imageId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete image');
+    }
+    console.log('Image deleted successfully');
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+```
+2. Authenticated Deletion Request:
+
+- The deleteImage function retrieves the accessToken from AsyncStorage and includes it in the Authorization header, enabling only authenticated users to delete images. This secure request removes the specified image from the backend.
+
+3. Error Handling:
+
+- The function includes error handling to catch any issues during the deletion process, displaying an error message if the request fails or if authentication is not available (where token expired).
+
+4. User Interface Update:
+
+- After a successful deletion, the app logs a confirmation and can update the UI to reflect the change, such as removing the deleted image from view or refreshing the image list.
+
+### Image Upload
+The image upload form allows users to select, customize, and upload images with metadata like title, description, and date taken. This feature includes image selection, compression, and authenticated uploads to the server. During implementation, I encountered challenges with image sizing and date compatibility, which are explained in detail below.
+
+src/UploadForm.js
+```react-native
+const uploadImage = async () => {
+  if (!imageUri) {
+    Alert.alert('Please select an image first');
+    return;
+  }
+  if (!title) {
+    Alert.alert('Please provide a title.');
+    return;
+  }
+
+  try {
+    const compressedImageUri = await compressImage(imageUri);
+
+    const formData = new FormData();
+    const modifiedImageName = imageName.endsWith('.jpg') ? imageName : `${imageName}.jpg`;
+
+    formData.append('image', {
+      uri: compressedImageUri,
+      name: modifiedImageName,
+      type: 'image/jpeg',
+    });
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('attribution', attribution);
+    formData.append('license_link', licenseLink);
+    formData.append('date_taken', dateTaken.toISOString().split('T')[0]);
+    formData.append('camera_model', cameraModel);
+    formData.append('category', category);
+    formData.append('order', order);
+    const token = await AsyncStorage.getItem('accessToken');
+    setUploading(true);
+
+    const response = await axios.post(
+      'https://image360.oppget.com/api/upload-photo/',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    Alert.alert('Image uploaded successfully!');
+    console.log('Server response:', response.data);
+  } catch (error) {
+    console.log('Error Response:', error.response);
+    Alert.alert('Upload failed: ' + error.message);
+  } finally {
+    setUploading(false);
+  }
+};
+```
+2. Image Selection and Compression:
+- The pickImage function lets users select an image from their gallery, and compressImage resizes it to optimize upload performance.
+
+> **Difficulty that I found**: When I first worked with this feature, I did not use compressImage to resize the image. As a result, for some images, I encountered an error indicating they were too large, and the server timed out and rejected the request when I attempted to upload them. 
+
+3. Form Fields for MetaData:
+- Additional form fields enable users to enter metadata such as title, description, camera model, license, and category. Each field is stored in state and appended to formData for the upload request.
+
+> **Compatibility Challenge**: Because we are using a Django setup for the backend with a DateField for the date, I initially had to research compatibility. I found that DateTimePicker is a useful package for React Native, providing a well-designed UI component for iOS and formatting the date correctly to match our backend implementation.
+
+4. Authenticated Upload Request:
+- The uploadImage function retrieves the accessToken from AsyncStorage and includes it in the request headers to ensure only authenticated users can upload images. The function then sends the image and metadata to the server.
+
+5. Error Handling:
+- If any required fields are missing, alerts prompt users to complete them. The app also includes error handling for upload failures, displaying an alert with a descriptive message.
 
 ## New Package in Phase II
 - DateTimePicker : using for date field
