@@ -249,11 +249,91 @@ Upload Form
 
 
 ## Features
-- User Authentication
-- JWT Token Storage
-- Image Fetching
-- Image Deletion
-- Image Upload
+### User Authentication
+1. Code Snippet for User Login
+
+```react-native
+const LoginScreen = ({ navigation }) => {
+  const [username, setUserName] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('https://image360.oppget.com/api/token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access) {
+          await AsyncStorage.setItem('accessToken', data.access);
+          await AsyncStorage.setItem('refreshToken', data.refresh);
+          console.log('Access token saved successfully:', data.access);
+
+          // Navigate to the Home screen
+          navigation.navigate('Home');
+        } else {
+          setErrorMessage('No access token found');
+        }
+      } else {
+        const data = await response.json();
+        setErrorMessage(data.message);
+      }
+    } catch (error) {
+      setErrorMessage('An error occurred: ' + error);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUserName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+      <Button title="Login" onPress={handleLogin} />
+    </SafeAreaView>
+  );
+};
+```
+
+2. Login Screen Setup:
+- The app provides a LoginScreen component for user login, managed with React’s useState hooks to handle the username, password, and errorMessage states. These states help manage the form inputs and display error messages if login attempts fail.
+
+3. Login Process:
+- The handleLogin function within LoginScreen is the core of the login process. This function executes when the user taps the “Login” button, attempting to authenticate with the backend server.
+
+- Within handleLogin, the app sends a POST request to an API endpoint (https://image360.oppget.com/api/token/) with username and password in the request body.
+
+- The request is crafted using the fetch API, and headers include Content-Type: application/json to specify JSON format for the data.
+
+4. Response Handling:
+- If the server responds with a success status, the app checks if an access token is included in the response.
+
+- If an access token is received, the user is redirected to the Home screen via navigation.navigate('Home'). This navigation happens right after the token check, creating a seamless transition from login to the authenticated home view.
+
+
+### JWT Token Storage
+### Image Fetching
+### Image Deletion
+### Image Upload
 
 ## New Package in Phase II
 - DateTimePicker : using for date field
