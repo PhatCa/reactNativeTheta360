@@ -250,6 +250,8 @@ Upload Form
 
 ## Features
 ### User Authentication
+To implement secure user access, we added a basic token-based authentication system to the app. Our goal was to allow users to log in with credentials that would be verified by a backend server, with successful authentication granting access to the main app features. Below are the steps we used to implement this feature:
+
 1. Code Snippet for User Login
 
 ```react-native
