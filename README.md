@@ -520,7 +520,7 @@ const uploadImage = async () => {
 3. Form Fields for MetaData:
 - Additional form fields enable users to enter metadata such as title, description, camera model, license, and category. Each field is stored in state and appended to formData for the upload request.
 
-> ** Compatibility Challenge **: Because we are using a Django setup for the backend with a DateField for the date, I initially had to research compatibility. I found that DateTimePicker is a useful package for React Native, providing a well-designed UI component for iOS and formatting the date correctly to match our backend implementation.
+> **Compatibility Challenge**: Because we are using a Django setup for the backend with a DateField for the date, I initially had to research compatibility. I found that DateTimePicker is a useful package for React Native, providing a well-designed UI component for iOS and formatting the date correctly to match our backend implementation.
 
 4. Authenticated Upload Request:
 - The uploadImage function retrieves the accessToken from AsyncStorage and includes it in the request headers to ensure only authenticated users can upload images. The function then sends the image and metadata to the server.
