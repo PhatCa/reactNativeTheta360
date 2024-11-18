@@ -598,3 +598,12 @@ const pickImage = () => {
   1. image is on image360.oppget.com
   2. image is already downloaded from image360.oppget.com and stored in camera roll of iOS
   
+
+### Trouble shooting
+1. Image Not Displaying in Webview
+
+The WebView loads the viewer.html file, and an imageUrl variable is passed to the html. However, no image is being rendered possible error coming from passing imageUrl over to viewer.html?
+
+2. Lack of Debugging Console Logs in WebView
+
+Currently, there is no logging mechanism for debugging directly in the WebView. console.log statements in viewer.html do not display in the mobile console, making it challenging to diagnose issues within the WebView.
