@@ -51,21 +51,21 @@ const UploadForm = () => {
     });
   };
 
-  const compressImage = async (imageUri) => {
-    try {
-      const response = await ImageResizer.createResizedImage(
-        imageUri,
-        800,
-        600,
-        'JPEG',
-        80
-      );
-      return response.uri;
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Image compression failed: ' + error.message);
-    }
-  };
+//   const compressImage = async (imageUri) => {
+//     try {
+//       const response = await ImageResizer.createResizedImage(
+//         imageUri,
+//         800,
+//         600,
+//         'JPEG',
+//         80
+//       );
+//       return response.uri;
+//     } catch (error) {
+//       console.error(error);
+//       Alert.alert('Image compression failed: ' + error.message);
+//     }
+//   };
 
   const uploadImage = async () => {
     if (!imageUri) {
@@ -78,13 +78,13 @@ const UploadForm = () => {
       }
 
     try {
-      const compressedImageUri = await compressImage(imageUri);
+    //   const compressedImageUri = await compressImage(imageUri);
 
       const formData = new FormData();
       const modifiedImageName = imageName.endsWith('.jpg') ? imageName : `${imageName}.jpg`;
 
       formData.append('image', {
-        uri: compressedImageUri,
+        uri: imageUri,
         name: modifiedImageName,
         type: 'image/jpeg',
       });
